@@ -1,6 +1,7 @@
-module Elmoji exposing (..)
-
 --TODO: narrow down the exported names
+
+
+module Elmoji exposing (..)
 
 import Char
 import Html exposing (..)
@@ -8,7 +9,8 @@ import Html.Events exposing (..)
 import Html.App as Html
 import List
 import String
-import Elmoji.Valid exposing (member, store)
+import Elmoji.Valid exposing (member, store, splitPrefix)
+import Elmoji.Hex exposing (dump)
 
 
 main : Program Never
@@ -62,17 +64,12 @@ view model =
             (div [] [ text <| toString <| member model store ]
                 :: (List.map
                         (\c ->
-                            div [] [ text (toString (Char.toCode c)) ]
+                            div [] [ c |> Char.toCode |> dump |> toString |> text ]
                         )
                         (String.toList model)
                    )
             )
         ]
-
-
-(.) : (a -> b) -> a -> b
-(.) f x =
-    f x
 
 
 type Chunk
@@ -85,7 +82,9 @@ type String'
 
 
 deref : String' -> List Chunk
-deref accum =
-    case accum of
-        String' a ->
-            a
+deref s =
+    let
+        ( String' l ) =
+            s
+    in
+        l
