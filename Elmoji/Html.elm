@@ -1,4 +1,4 @@
-module Elmoji.Html exposing (textWith, emojiOne)
+module Elmoji.Html exposing (..)
 
 import Elmoji exposing (..)
 import Elmoji.Internal.Hex exposing (dump)
@@ -28,14 +28,19 @@ textWith replacer body =
             chunks
 
 
-e1Base : String
-e1Base =
+urlWithBase : String -> List String -> String
+urlWithBase base codepts =
+    base ++ (List.intersperse "-" codepts |> String.join "") ++ ".png"
+
+
+emojiOneBaseUrl : String
+emojiOneBaseUrl =
     "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"
 
 
-emojiOne : (List String -> Html a)
-emojiOne codepts =
-    img [ src (e1Base ++ (List.intersperse "-" codepts |> String.join "") ++ ".png")
+replaceWithEmojiOne : (List String -> Html a)
+replaceWithEmojiOne codepts =
+    img [ src <| urlWithBase emojiOneBaseUrl codepts
         , style [("height", "1em")]
         ]
         []

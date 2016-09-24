@@ -1,8 +1,11 @@
+module Main exposing (main)
+
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.App as Html
 import List
-import Elmoji.Html exposing (textWith, emojiOne)
+import Elmoji.Html exposing (textWith, replaceWithEmojiOne)
 
 
 main : Program Never
@@ -49,12 +52,11 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ input [ onInput InputChanged ] []
-        , div []
-            (text model)
+        [ textarea [ onInput InputChanged ] []
+        , div [] (text model)
         ]
 
 
 text : String -> List (Html Msg)
 text =
-    textWith emojiOne
+    textWith replaceWithEmojiOne
