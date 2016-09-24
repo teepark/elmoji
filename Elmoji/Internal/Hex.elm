@@ -1,8 +1,7 @@
-module Elmoji.Hex exposing (dump)
+module Elmoji.Internal.Hex exposing (dump)
 
 import Array
 import Char
-import List
 import Maybe
 import String
 

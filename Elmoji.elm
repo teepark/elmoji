@@ -1,90 +1,122 @@
---TODO: narrow down the exported names
+module Elmoji exposing (String'(..), Chunk(..), parse)
 
-
-module Elmoji exposing (..)
-
-import Char
-import Html exposing (..)
-import Html.Events exposing (..)
-import Html.App as Html
+import Dict
 import List
 import String
-import Elmoji.Valid exposing (member, store, splitPrefix)
-import Elmoji.Hex exposing (dump)
-
-
-main : Program Never
-main =
-    Html.beginnerProgram
-        { model = init
-        , update = update
-        , view = view
-        }
-
-
-
--- MODEL
-
-
-type alias Model =
-    String
-
-
-init : Model
-init =
-    ""
-
-
-
--- UPDATE
-
-
-type Msg
-    = InputChanged String
-
-
-update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        InputChanged msg ->
-            msg
-
-
-
--- VIEW
-
-
-view : Model -> Html Msg
-view model =
-    div []
-        [ input
-            [ onInput InputChanged ]
-            []
-        , div []
-            (div [] [ text <| toString <| member model store ]
-                :: (List.map
-                        (\c ->
-                            div [] [ c |> Char.toCode |> dump |> toString |> text ]
-                        )
-                        (String.toList model)
-                   )
-            )
-        ]
+import Elmoji.Internal.Valid exposing (Store(..), store, longest)
 
 
 type Chunk
     = StringChunk String
-    | CodeChunk String
+    | CodeChunk (List Int)
 
 
 type String'
     = String' (List Chunk)
 
 
-deref : String' -> List Chunk
-deref s =
+parse : String -> String'
+parse string =
     let
-        ( String' l ) =
-            s
+        string' =
+            parse' "" [] string
     in
-        l
+        String' <| List.reverse string'
+
+
+parse' : String -> List Chunk -> String -> List Chunk
+parse' buf accum string =
+    case ( string, buf ) of
+        ( "", "" ) ->
+            accum
+
+        ( "", _ ) ->
+            StringChunk (String.reverse buf) :: accum
+
+        _ ->
+            case splitPrefix string of
+                ( ( 0, _ ), _ ) ->
+                    case String.uncons string of
+                        Nothing ->
+                            accum
+
+                        Just ( c, rest ) ->
+                            parse' (String.cons c buf) accum rest
+
+                ( ( matchLen, matchCodes ), remaining ) ->
+                    let
+                        accum =
+                            if buf == "" then
+                                accum
+                            else
+                                (StringChunk (String.reverse buf)) :: accum
+                    in
+                        parse' "" ((CodeChunk matchCodes) :: accum) remaining
+
+
+splitPrefix : String -> ( ( Int, List Int ), String )
+splitPrefix string =
+    let
+        ( len, code ) =
+            findPrefix ( 0, [] ) 0 string store
+    in
+        ( ( len, code )
+        , String.dropLeft len string
+        )
+
+
+findPrefix : ( Int, List Int ) -> Int -> String -> Store -> ( Int, List Int )
+findPrefix lastFound count string store =
+    if count > longest then
+        lastFound
+    else
+        let
+            (Store foundCode children) =
+                store
+
+            bestMatch =
+                Maybe.withDefault
+                    lastFound
+                    (Maybe.map
+                        (\code -> ( count, code ))
+                        foundCode
+                    )
+        in
+            case String.uncons string of
+                Nothing ->
+                    bestMatch
+
+                Just ( char, rest ) ->
+                    case Dict.get char children of
+                        Nothing ->
+                            bestMatch
+
+                        Just childStore ->
+                            findPrefix
+                                bestMatch
+                                (count + 1)
+                                rest
+                                childStore
+
+
+
+{- findPrefix Maybes:
+
+         |   no child   |    child     |
+   ------+--------------+--------------+-
+         |              |              |
+   no    |    return    | recurse with |
+   match |  last match  |  last match  | <- "last match"
+         |              |              |
+   ------+--------------+--------------+-
+         |              |              |
+   match |    return    | recurse with |
+         |  new match   |  "savepoint" | <- "new match"
+         |              |              |
+   ------+--------------+--------------+-
+         |      ^       |      ^       |
+             "return"      "recurse"
+
+   (also the String.uncons, but we need the char
+   to test for a child so it's not independent)
+-}

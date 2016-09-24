@@ -1,56 +1,9 @@
--- TODO: narrow down the exported names
+module Elmoji.Internal.Valid exposing (Store(..), store, longest)
 
-
-module Elmoji.Valid exposing (..)
-
+import Debug exposing (log)
 import Char
 import Dict
 import String
-
-
-{-| Separates any prefixed emoji from the rest of a string.
-    In the case where there is no emoji prefix, will just
-    return "" as the first item of the tuple. In any case,
-    joining the two returned strings would yield the input
-    string again.
-
-    TODO: better name
--}
-splitPrefix : String -> ( String, String )
-splitPrefix string =
-    let
-        len =
-            findPrefix 0 0 string store
-    in
-        ( String.left len string
-        , String.dropLeft len string
-        )
-
-
-findPrefix : Int -> Int -> String -> Store -> Int
-findPrefix found count string store =
-    if count > longest then
-        found
-    else
-        let
-            ( Store code children ) =
-                store
-        in
-            case String.uncons string of
-                Nothing ->
-                    found
-
-                Just ( c, rest ) ->
-                    case Dict.get c children of
-                        Nothing ->
-                            found
-
-                        Just child ->
-                            findPrefix
-                                count
-                                (count + 1)
-                                rest
-                                child
 
 
 type Store
@@ -85,6 +38,11 @@ load ( bytes, codePoints ) store =
 store : Store
 store =
     List.foldl load empty pairs
+
+
+longest : Int
+longest =
+    List.foldl max 0 (List.map (String.length << fst) pairs)
 
 
 pairs : List (String, List Int)
@@ -1883,13 +1841,6 @@ pairs =
         ]
 
 
-longest : Int
-longest =
-    List.foldl max 0 (List.map (String.length << fst) pairs)
-
-
-{-| two-argument version of (<<)
--}
 (<<<) : (c -> d) -> (a -> b -> c) -> a -> b -> d
 (<<<) f g =
     (\a b ->
