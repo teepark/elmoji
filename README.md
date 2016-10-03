@@ -1,7 +1,4 @@
-# This is a work in progress, don't use it yet
+# Seamlessly display emoji in Elm applications
 
-This project aims to provide text substitution for emoji characters.
-
-A final API hasn't been nailed down, but I want to make it easy to swap out
-all emojis in a string for &lt;img&gt; tags pointing to Twemoji and/or
-EmojiOne.
+This library can comb through a string, identify the emojis within it, and
+produce html with all emoji characters replaced with free CDN-hosted images.
