@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.App as Html
 import List
-import Elmoji.Html exposing (textWith, replaceWithEmojiOne)
+import Elmoji.Html exposing (textWith, replaceWithEmojiOne, replaceWithTwemoji)
 
 
 main : Program Never
@@ -53,10 +53,17 @@ view : Model -> Html Msg
 view model =
     div []
         [ textarea [ onInput InputChanged ] []
-        , div [] (text model)
+        , h3 [] [ text "Twemoji:" ]
+        , div [] (twext model)
+        , h3 [] [ text "EmojiOne:" ]
+        , div [] (eotext model)
         ]
 
 
-text : String -> List (Html Msg)
-text =
+twext : String -> List (Html Msg)
+twext =
+    textWith replaceWithTwemoji
+
+eotext : String -> List (Html Msg)
+eotext =
     textWith replaceWithEmojiOne

@@ -38,9 +38,22 @@ emojiOneBaseUrl =
     "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"
 
 
+twemojiBaseUrl : String
+twemojiBaseUrl =
+    "https://twemoji.maxcdn.com/2/72x72/"
+
+
 replaceWithEmojiOne : (List String -> Html a)
 replaceWithEmojiOne codepts =
     img [ src <| urlWithBase emojiOneBaseUrl codepts
+        , style [("height", "1em")]
+        ]
+        []
+
+
+replaceWithTwemoji : (List String -> Html a)
+replaceWithTwemoji codepts =
+    img [ src <| urlWithBase twemojiBaseUrl codepts
         , style [("height", "1em")]
         ]
         []
