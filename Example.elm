@@ -5,7 +5,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.App as Html
 import List
-import Elmoji.Html exposing (textWith, replaceWithEmojiOne, replaceWithTwemoji)
+import String
+import Elmoji exposing (text', textWith, replaceWithTwemoji)
 
 
 main : Program Never
@@ -56,7 +57,9 @@ view model =
         , h3 [] [ text "Twemoji:" ]
         , div [] (twext model)
         , h3 [] [ text "EmojiOne:" ]
-        , div [] (eotext model)
+        , div [] [ text' model ]
+        , h3 [] [ text "Custom:" ]
+        , div [] (customtext model)
         ]
 
 
@@ -64,6 +67,12 @@ twext : String -> List (Html Msg)
 twext =
     textWith replaceWithTwemoji
 
-eotext : String -> List (Html Msg)
-eotext =
-    textWith replaceWithEmojiOne
+
+mapEmoji : List String -> Html a
+mapEmoji codePoints =
+    text ("(I'm code " ++ (String.join "-" codePoints) ++ ")")
+
+
+customtext : String -> List (Html Msg)
+customtext =
+    textWith mapEmoji

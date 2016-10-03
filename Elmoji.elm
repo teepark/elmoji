@@ -1,122 +1,112 @@
-module Elmoji exposing (String'(..), Chunk(..), parse)
+module Elmoji exposing (text', textWith, replaceWithEmojiOne, replaceWithTwemoji)
 
-import Dict
+{-| This library is for conveniently supporting
+[emoji](http://unicode.org/emoji/charts/full-emoji-list.html) in Elm
+applications.
+
+There is a high-level drop-in replacement for `Html.text` which has to make
+some extra assumptions about the app, and customizable mapping over emojis.
+
+# The high level
+@docs text'
+
+# Customizable
+@docs textWith, replaceWithEmojiOne, replaceWithTwemoji
+-}
+
+import Elmoji.Internal.Parse exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 import List
 import String
-import Elmoji.Internal.Valid exposing (Store(..), store, longest)
 
 
-type Chunk
-    = StringChunk String
-    | CodeChunk (List Int)
+{-| Convert a String with unicode emoji characters into an Html element
+containing the text with `<img>` tags replacing the emojis.
 
+This function produces a `<span class='elmoji'>` containing the text, replacing
+emojis with `<img class='elmoji-img elmoji-one'>` tags pointing to CDN-hosted
+[EmojiOne](http://emojione.com/).
 
-type String'
-    = String' (List Chunk)
-
-
-parse : String -> String'
-parse string =
-    let
-        string' =
-            parse' "" [] string
-    in
-        String' <| List.reverse string'
-
-
-parse' : String -> List Chunk -> String -> List Chunk
-parse' buf accum string =
-    case ( string, buf ) of
-        ( "", "" ) ->
-            accum
-
-        ( "", _ ) ->
-            StringChunk (String.reverse buf) :: accum
-
-        _ ->
-            case splitPrefix string of
-                ( ( 0, _ ), _ ) ->
-                    case String.uncons string of
-                        Nothing ->
-                            accum
-
-                        Just ( c, rest ) ->
-                            parse' (String.cons c buf) accum rest
-
-                ( ( matchLen, matchCodes ), remaining ) ->
-                    let
-                        accum =
-                            if buf == "" then
-                                accum
-                            else
-                                (StringChunk (String.reverse buf)) :: accum
-                    in
-                        parse' "" ((CodeChunk matchCodes) :: accum) remaining
-
-
-splitPrefix : String -> ( ( Int, List Int ), String )
-splitPrefix string =
-    let
-        ( len, code ) =
-            findPrefix ( 0, [] ) 0 string store
-    in
-        ( ( len, code )
-        , String.dropLeft len string
-        )
-
-
-findPrefix : ( Int, List Int ) -> Int -> String -> Store -> ( Int, List Int )
-findPrefix lastFound count string store =
-    if count > longest then
-        lastFound
-    else
-        let
-            (Store foundCode children) =
-                store
-
-            bestMatch =
-                Maybe.withDefault
-                    lastFound
-                    (Maybe.map
-                        (\code -> ( count, code ))
-                        foundCode
-                    )
-        in
-            case String.uncons string of
-                Nothing ->
-                    bestMatch
-
-                Just ( char, rest ) ->
-                    case Dict.get char children of
-                        Nothing ->
-                            bestMatch
-
-                        Just childStore ->
-                            findPrefix
-                                bestMatch
-                                (count + 1)
-                                rest
-                                childStore
-
-
-
-{- findPrefix Maybes:
-
-         |   no child   |    child     |
-   ------+--------------+--------------+-
-         |              |              |
-   no    |    return    | recurse with |
-   match |  last match  |  last match  | <- "last match"
-         |              |              |
-   ------+--------------+--------------+-
-         |              |              |
-   match |    return    | recurse with |
-         |  new match   |  "savepoint" | <- "new match"
-         |              |              |
-   ------+--------------+--------------+-
-         |      ^       |      ^       |
-             "return"      "recurse"
-
-   (also the String.uncons, but we need the char
-   to test for a child so it's not independent)
+    div [] [ text' "Live long and prosper 🖖" ]
 -}
+text' : String -> Html a
+text' =
+    textWith replaceWithEmojiOne >> span [ class "elmoji" ]
+
+
+{-| Create a customized emoji converter. The function argument maps emoji
+(identified by the lowercase hex-encoded unicode code point sequence) to
+Html nodes.
+
+    mapEmoji : List String -> Html a
+    mapEmoji codePoints =
+        text ("(I'm code " ++ (String.join "-" codePoints) ++ ")")
+
+    div []
+        ( textWith mapEmoji "here's a penguin:🐧" )
+-}
+textWith : (List String -> Html a) -> String -> List (Html a)
+textWith replacer body =
+    let
+        ( String' chunks ) =
+            parse body
+    in
+        List.map
+            (\chunk ->
+                case chunk of
+                    StringChunk s ->
+                        text s
+
+                    CodeChunk codepts ->
+                        replacer codepts
+            )
+            chunks
+
+
+{-| Turn an emoji unicode sequence into an `<img>` pointing at
+[EmojiOne](http://emojione.com/), with classes `elmoji-img` and `elmoji-one`.
+
+    -- this is the definition of text' from this module.
+    text' : String -> Html a
+    text' =
+        textWith replaceWithEmojiOne >> span [ class "elmoji" ]
+-}
+replaceWithEmojiOne : (List String -> Html a)
+replaceWithEmojiOne codepts =
+    img [ src <| urlWithBase emojiOneBaseUrl codepts
+        , class "elmoji-img elmoji-one"
+        ]
+        []
+
+
+{-| Convert an emoji unicode sequence into a
+[Twemoji](http://twitter.github.io/twemoji/) `<img>` tag. It will have CSS
+classes `elmoji-img` and `elmoji-twem`.
+
+    -- build your own Html.text drop-in replacement
+    text' : String -> Html a
+    text' body =
+        span [] ( textWith replaceWithTwemoji body )
+-}
+replaceWithTwemoji : (List String -> Html a)
+replaceWithTwemoji codepts =
+    img [ src <| urlWithBase twemojiBaseUrl codepts
+        , class "elmoji-img elmoji-twem"
+        ]
+        []
+
+
+urlWithBase : String -> List String -> String
+urlWithBase base codepts =
+    base ++ (List.intersperse "-" codepts |> String.join "") ++ ".png"
+
+
+emojiOneBaseUrl : String
+emojiOneBaseUrl =
+    "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"
+
+
+twemojiBaseUrl : String
+twemojiBaseUrl =
+    "https://twemoji.maxcdn.com/2/72x72/"
