@@ -49,7 +49,7 @@ Html nodes.
 textWith : (List String -> Html a) -> String -> List (Html a)
 textWith replacer body =
     let
-        ( String' chunks ) =
+        (String' chunks) =
             parse body
     in
         List.map
@@ -72,9 +72,10 @@ textWith replacer body =
     text' =
         textWith replaceWithEmojiOne >> span [ class "elmoji" ]
 -}
-replaceWithEmojiOne : (List String -> Html a)
+replaceWithEmojiOne : List String -> Html a
 replaceWithEmojiOne codepts =
-    img [ src <| urlWithBase emojiOneBaseUrl codepts
+    img
+        [ src <| urlWithBase emojiOneBaseUrl codepts
         , class "elmoji-img elmoji-one"
         ]
         []
@@ -89,9 +90,10 @@ classes `elmoji-img` and `elmoji-twem`.
     text' body =
         span [] ( textWith replaceWithTwemoji body )
 -}
-replaceWithTwemoji : (List String -> Html a)
+replaceWithTwemoji : List String -> Html a
 replaceWithTwemoji codepts =
-    img [ src <| urlWithBase twemojiBaseUrl codepts
+    img
+        [ src <| urlWithBase twemojiBaseUrl codepts
         , class "elmoji-img elmoji-twem"
         ]
         []
