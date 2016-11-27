@@ -1,4 +1,4 @@
-module Elmoji.Internal.Parse exposing (String'(..), Chunk(..), parse)
+module Elmoji.Internal.Parse exposing (String_(..), Chunk(..), parse)
 
 import Dict
 import List
@@ -11,21 +11,21 @@ type Chunk
     | CodeChunk (List String)
 
 
-type String'
-    = String' (List Chunk)
+type String_
+    = String_ (List Chunk)
 
 
-parse : String -> String'
+parse : String -> String_
 parse string =
     let
-        string' =
-            parse' "" [] string
+        string_ =
+            parse_ "" [] string
     in
-        String' <| List.reverse string'
+        String_ <| List.reverse string_
 
 
-parse' : String -> List Chunk -> String -> List Chunk
-parse' buf accum string =
+parse_ : String -> List Chunk -> String -> List Chunk
+parse_ buf accum string =
     case ( string, buf ) of
         ( "", "" ) ->
             accum
@@ -41,17 +41,17 @@ parse' buf accum string =
                             accum
 
                         Just ( c, rest ) ->
-                            parse' (String.cons c buf) accum rest
+                            parse_ (String.cons c buf) accum rest
 
                 ( ( matchLen, matchCodes ), remaining ) ->
                     let
-                        accum =
+                        nextAccum =
                             if buf == "" then
                                 accum
                             else
                                 (StringChunk (String.reverse buf)) :: accum
                     in
-                        parse' "" ((CodeChunk matchCodes) :: accum) remaining
+                        parse_ "" ((CodeChunk matchCodes) :: nextAccum) remaining
 
 
 splitPrefix : String -> ( ( Int, List String ), String )

@@ -6,7 +6,7 @@ import Html.Events exposing (..)
 import Html.App as Html
 import List
 import String
-import Elmoji exposing (text', textWith, replaceWithTwemoji)
+import Elmoji exposing (text_, textWith, replaceWithTwemoji)
 
 
 main : Program Never
@@ -57,7 +57,7 @@ view model =
         , h3 [] [ text "Twemoji:" ]
         , div [] (twext model)
         , h3 [] [ text "EmojiOne:" ]
-        , div [] [ text' model ]
+        , div [] [ text_ model ]
         , h3 [] [ text "Custom:" ]
         , div [] (customtext model)
         ]

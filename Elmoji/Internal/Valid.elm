@@ -41,7 +41,7 @@ store =
 
 longest : Int
 longest =
-    List.foldl max 0 (List.map (String.length << fst) pairs)
+    List.foldl max 0 (List.map (String.length << Tuple.first) pairs)
 
 
 pairs : List ( String, List String )
@@ -1857,31 +1857,31 @@ toList =
 
 fold : (String -> a -> a) -> a -> Store -> a
 fold =
-    fold' ""
+    fold_ ""
 
 
-fold' : String -> (String -> a -> a) -> a -> Store -> a
-fold' prefix func accum store =
+fold_ : String -> (String -> a -> a) -> a -> Store -> a
+fold_ prefix func accum store =
     let
         (Store ending children) =
             store
 
-        accum =
+        nextAccum =
             if wellWasIt ending then
                 func (String.reverse prefix) accum
             else
                 accum
     in
         Dict.foldr
-            (\char child ( prefix, accum ) ->
+            (\char child ( prefix, nextAccum ) ->
                 let
                     string =
                         String.cons char prefix
                 in
                     ( prefix
-                    , fold' string func accum child
+                    , fold_ string func nextAccum child
                     )
             )
-            ( prefix, accum )
+            ( prefix, nextAccum )
             children
-            |> snd
+            |> Tuple.second

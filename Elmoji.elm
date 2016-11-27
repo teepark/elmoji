@@ -1,4 +1,4 @@
-module Elmoji exposing (text', textWith, replaceWithEmojiOne, replaceWithTwemoji)
+module Elmoji exposing (text_, textWith, replaceWithEmojiOne, replaceWithTwemoji)
 
 {-| This library is for conveniently supporting
 [emoji](http://unicode.org/emoji/charts/full-emoji-list.html) in Elm
@@ -8,7 +8,7 @@ There is a high-level drop-in replacement for `Html.text` which has to make
 some extra assumptions about the app, and customizable mapping over emojis.
 
 # The high level
-@docs text'
+@docs text_
 
 # Customizable
 @docs textWith, replaceWithEmojiOne, replaceWithTwemoji
@@ -30,8 +30,8 @@ emojis with `<img class='elmoji-img elmoji-one'>` tags pointing to CDN-hosted
 
     div [] [ text' "Live long and prosper 🖖" ]
 -}
-text' : String -> Html a
-text' =
+text_ : String -> Html a
+text_ =
     textWith replaceWithEmojiOne >> span [ class "elmoji" ]
 
 
@@ -49,7 +49,7 @@ Html nodes.
 textWith : (List String -> Html a) -> String -> List (Html a)
 textWith replacer body =
     let
-        (String' chunks) =
+        (String_ chunks) =
             parse body
     in
         List.map
