@@ -3,13 +3,12 @@ module Main exposing (main)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html.App as Html
 import List
 import String
 import Elmoji exposing (text_, textWith, replaceWithTwemoji)
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
     Html.beginnerProgram
         { model = init
