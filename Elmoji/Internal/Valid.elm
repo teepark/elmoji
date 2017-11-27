@@ -2,6 +2,7 @@ module Elmoji.Internal.Valid exposing (Store(..), store, longest)
 
 import Dict
 import String
+import Elmoji.Internal.ShortName exposing (emojiOne)
 
 
 type Store
@@ -1855,6 +1856,7 @@ pairs =
            , ( "🇿🇲", [ "1f1ff", "1f1f2" ] )
            , ( "🇿🇼", [ "1f1ff", "1f1fc" ] )
            ]
+        ++ emojiOne
 
 
 wellWasIt : Maybe a -> Bool
