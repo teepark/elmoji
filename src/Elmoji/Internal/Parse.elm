@@ -1,9 +1,9 @@
-module Elmoji.Internal.Parse exposing (String_(..), Chunk(..), parse)
+module Elmoji.Internal.Parse exposing (Chunk(..), String_(..), parse)
 
 import Dict
+import Elmoji.Internal.Valid exposing (Store(..), longest, store)
 import List
 import String
-import Elmoji.Internal.Valid exposing (Store(..), store, longest)
 
 
 type Chunk
@@ -21,7 +21,7 @@ parse string =
         string_ =
             parse_ "" [] string
     in
-        String_ <| List.reverse string_
+    String_ <| List.reverse string_
 
 
 parse_ : String -> List Chunk -> String -> List Chunk
@@ -48,10 +48,11 @@ parse_ buf accum string =
                         nextAccum =
                             if buf == "" then
                                 accum
+
                             else
-                                (StringChunk (String.reverse buf)) :: accum
+                                StringChunk (String.reverse buf) :: accum
                     in
-                        parse_ "" ((CodeChunk matchCodes) :: nextAccum) remaining
+                    parse_ "" (CodeChunk matchCodes :: nextAccum) remaining
 
 
 splitPrefix : String -> ( ( Int, List String ), String )
@@ -60,15 +61,16 @@ splitPrefix string =
         ( len, code ) =
             findPrefix ( 0, [] ) 0 string store
     in
-        ( ( len, code )
-        , String.dropLeft len string
-        )
+    ( ( len, code )
+    , String.dropLeft len string
+    )
 
 
 findPrefix : ( Int, List String ) -> Int -> String -> Store -> ( Int, List String )
 findPrefix lastFound count string store =
     if count > longest then
         lastFound
+
     else
         let
             (Store foundCode children) =
@@ -82,21 +84,21 @@ findPrefix lastFound count string store =
                         foundCode
                     )
         in
-            case String.uncons string of
-                Nothing ->
-                    bestMatch
+        case String.uncons string of
+            Nothing ->
+                bestMatch
 
-                Just ( char, rest ) ->
-                    case Dict.get char children of
-                        Nothing ->
+            Just ( char, rest ) ->
+                case Dict.get char children of
+                    Nothing ->
+                        bestMatch
+
+                    Just childStore ->
+                        findPrefix
                             bestMatch
-
-                        Just childStore ->
-                            findPrefix
-                                bestMatch
-                                (count + 1)
-                                rest
-                                childStore
+                            (count + 1)
+                            rest
+                            childStore
 
 
 
