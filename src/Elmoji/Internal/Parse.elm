@@ -55,6 +55,17 @@ parse_ buf accum string =
                     parse_ "" (CodeChunk matchCodes :: nextAccum) remaining
 
 
+dropLeft : Int -> String -> String
+dropLeft n string =
+    if n < 1 then
+        string
+    else
+        string
+            |> String.uncons
+            |> Maybe.map (Tuple.second >> dropLeft (n-1))
+            |> Maybe.withDefault string
+
+
 splitPrefix : String -> ( ( Int, List String ), String )
 splitPrefix string =
     let
@@ -62,7 +73,7 @@ splitPrefix string =
             findPrefix ( 0, [] ) 0 string store
     in
     ( ( len, code )
-    , String.dropLeft len string
+    , dropLeft len string
     )
 
 
