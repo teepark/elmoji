@@ -1,17 +1,18 @@
 module Main exposing (main)
 
+import Browser
+import Elmoji exposing (replaceWithTwemoji, textWith, text_)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import List
 import String
-import Elmoji exposing (text_, textWith, replaceWithTwemoji)
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    Html.beginnerProgram
-        { model = init
+    Browser.sandbox
+        { init = init
         , update = update
         , view = view
         }
@@ -39,10 +40,8 @@ type Msg
 
 
 update : Msg -> Model -> Model
-update msg model =
-    case msg of
-        InputChanged msg ->
-            msg
+update (InputChanged msg) model =
+    msg
 
 
 
@@ -69,7 +68,7 @@ twext =
 
 mapEmoji : List String -> Html a
 mapEmoji codePoints =
-    text ("(I'm code " ++ (String.join "-" codePoints) ++ ")")
+    text ("(I'm code " ++ String.join "-" codePoints ++ ")")
 
 
 customtext : String -> List (Html Msg)
