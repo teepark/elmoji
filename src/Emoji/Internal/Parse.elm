@@ -1,7 +1,7 @@
-module Elmoji.Internal.Parse exposing (Chunk(..), String_(..), parse)
+module Emoji.Internal.Parse exposing (Chunk(..), String_(..), parse)
 
 import Dict
-import Elmoji.Internal.Valid exposing (Store(..), longest, store)
+import Emoji.Internal.Valid exposing (Store(..), longest, store)
 import List
 import String
 
@@ -59,10 +59,11 @@ dropLeft : Int -> String -> String
 dropLeft n string =
     if n < 1 then
         string
+
     else
         string
             |> String.uncons
-            |> Maybe.map (Tuple.second >> dropLeft (n-1))
+            |> Maybe.map (Tuple.second >> dropLeft (n - 1))
             |> Maybe.withDefault string
 
 

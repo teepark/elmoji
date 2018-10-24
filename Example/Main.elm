@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Browser
-import Elmoji exposing (replaceWithTwemoji, textWith, text_)
+import Emoji exposing (replaceWithTwemoji, textWith, text_)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)

@@ -1,11 +1,11 @@
 {
     "type": "package",
-    "name": "stephenreddek/elmoji",
+    "name": "stephenreddek/elm-emoji",
     "summary": "Seamlessly display emoji in Elm applications.",
     "license": "BSD-3-Clause",
     "version": "1.0.0",
     "exposed-modules": [
-        "Elmoji"
+        "Emoji"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
