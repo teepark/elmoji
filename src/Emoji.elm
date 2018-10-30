@@ -33,7 +33,7 @@ This function produces a `<span class='elm-emoji'>` containing the text, replaci
 emojis with `<img class='elm-emoji-img elm-emoji-one'>` tags pointing to CDN-hosted
 [EmojiOne](http://emojione.com/).
 
-    div [] [ text' "Live long and prosper 🖖" ]
+    div [] [ text_ "Live long and prosper 🖖" ]
 
 -}
 text_ : String -> Html a
@@ -74,8 +74,8 @@ textWith replacer body =
 {-| Turn an emoji unicode sequence into an `<img>` pointing at
 [EmojiOne](http://emojione.com/), with classes `elm-emoji-img` and `elm-emoji-one`.
 
-    text' : String -> Html a
-    text' =
+    text_ : String -> Html a
+    text_ =
         textWith replaceWithEmojiOne >> span [ class "elm-emoji" ]
 
 -}
@@ -92,8 +92,8 @@ replaceWithEmojiOne codepts =
 [Twemoji](http://twitter.github.io/twemoji/) `<img>` tag. It will have CSS
 classes `elm-emoji-img` and `elm-emoji-twem`.
 
-    text' : String -> Html a
-    text' body =
+    text_ : String -> Html a
+    text_ body =
         span [] (textWith replaceWithTwemoji body)
 
 -}
